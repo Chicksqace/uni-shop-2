@@ -31,7 +31,16 @@
 </template>
 
 <script>
+  // 从 vuex 中按需导出 mapState 辅助方法
+  import {mapState,mapMutations,mapGetters} from 'vuex'
+  
   export default {
+    computed:{
+      // 调用 mapState 方法，把 m_cart 模块中的 cart 数组映射到当前页面中，作为计算属性来使用
+          // ...mapState('模块的名称', ['要映射的数据名称1', '要映射的数据名称2'])
+      ...mapState('m_cart',[]),
+      ...mapGetters('m_cart',['total']),
+    },
     data() {
       return {
         goods_info:{},
@@ -44,7 +53,7 @@
             }, {
               icon: 'cart',
               text: '购物车',
-              info: 21
+              info: 0
             }],
             // 右侧按钮组的配置对象
             buttonGroup: [{
@@ -66,6 +75,7 @@
       this.getGoodsDetail(goods_id)
     },
     methods: {
+      ...mapMutations('m_cart',['addToCart']),
       // 定义请求商品详情数据的方法
       async getGoodsDetail(goods_id) {
         const { data: res } = await uni.$http.get('/api/public/v1/goods/detail', { goods_id })
@@ -88,9 +98,47 @@
               url: '/pages/cart/cart'
             })
           }
-      }
+      },
+      // 右侧按钮的点击事件处理函数
+      buttonClick(e) {
+         // 1. 判断是否点击了 加入购物车 按钮
+         if (e.content.text === '加入购物车') {
+      
+            // 2. 组织一个商品的信息对象
+            const goods = {
+               goods_id: this.goods_info.goods_id,       // 商品的Id
+               goods_name: this.goods_info.goods_name,   // 商品的名称
+               goods_price: this.goods_info.goods_price, // 商品的价格
+               goods_count: 1,                           // 商品的数量
+               goods_small_logo: this.goods_info.goods_small_logo, // 商品的图片
+               goods_state: true                         // 商品的勾选状态
+            }
+      
+            // 3. 通过 this 调用映射过来的 addToCart 方法，把商品信息对象存储到购物车中
+            this.addToCart(goods)
+            
+         }
+      },
     },
-   
+   watch:{
+     // total(newVal){
+     //   const findResult=this.options.find(x=>x.text==='购物车')
+     //   if(findResult){
+     //     // 换新对象
+     //     findResult.info=newVal
+     //   }
+     // }
+     total:{
+       handler(newVal){
+           const findResult=this.options.find(x=>x.text==='购物车')
+           if(findResult){
+             // 换新对象
+             findResult.info=newVal
+           }
+       },
+       immediate:true
+     }
+  },
   }
 </script>
 

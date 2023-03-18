@@ -55,7 +55,14 @@
             "urlCheck" : true,
             "checkSiteMap" : false
         },
+       "requiredPrivateInfos": [
+           "getLocation",
+           "onLocationChange",
+           "startLocationUpdateBackground",
+           "chooseAddress"
+         ], 
         "usingComponents" : true
     },
+   
     "vueVersion" : "2"
 }
